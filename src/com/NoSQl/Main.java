@@ -19,7 +19,7 @@ public class Main {
     private static void runAggregationTest () throws Exception {
         DatabaseService<ObjectId> mongoDBService = new DatabaseService<>(factory.createDao(EDAOType.MongoDB), null);
 
-        // mongoDBService.generateSampleDataSet();
+        mongoDBService.generateSampleDataSet();
 
         AggregationTestService aggregationTestService = new AggregationTestService();
 
