@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Lock tables
+
 public class MySQLDAO implements IDAO<Integer> {
     private static final String url = "jdbc:mysql://localhost:3306/NoSQL";
     private static final String user = "root";
