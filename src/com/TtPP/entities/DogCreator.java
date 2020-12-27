@@ -1,12 +1,13 @@
 package com.TtPP.entities;
 
+import com.TtPP.DAO.ERole;
 import com.TtPP.DAO.IDAO;
 
 public class DogCreator implements IPetCreator {
     private final int dogKindId;
 
     public DogCreator (IDAO dao) throws Exception {
-        this.dogKindId = dao.getKindIdByName("dog");
+        this.dogKindId = dao.getKindIdByName("dog", ERole.ADMIN);
     }
 
     public Pet create () {

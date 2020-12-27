@@ -2,6 +2,7 @@ package com.TtPP;
 
 import com.TtPP.DAO.DAOFactory;
 import com.TtPP.DAO.EDAOType;
+import com.TtPP.DAO.ERole;
 import com.TtPP.DAO.IDAO;
 import com.TtPP.builders.BreedBuilder;
 import com.TtPP.builders.CityBuilder;
@@ -59,7 +60,7 @@ public class Main {
 
             try {
                 Point2D nextPoint = new Point(40, 40);
-                for (Pet pet: dao.getAllPets()) {
+                for (Pet pet: dao.getAllPets(ERole.ADMIN)) {
                     PetComponent component = new PetComponent(pet, nextPoint);
 
                     component.paint(g);
@@ -96,16 +97,16 @@ public class Main {
         randomCat.setFkOwnerId(1);
         randomCat.setFkBreedId(1);
 
-        randomDog.setPetId(mysql.createPet(randomDog));
-        randomCat.setPetId(mysql.createPet(randomCat));
+        randomDog.setPetId(mysql.createPet(randomDog, ERole.ADMIN));
+        randomCat.setPetId(mysql.createPet(randomCat, ERole.ADMIN));
 
 
         date.setTime(2017);
         randomDog.setDateOfBirth(date);
 
-        mysql.updatePet(randomDog);
+        mysql.updatePet(randomDog, ERole.ADMIN);
 
-        mysql.deletePet(randomDog);
+        mysql.deletePet(randomDog, ERole.ADMIN);
     }
     /**`
      * @relatesTo Lab 1-2
@@ -124,8 +125,8 @@ public class Main {
                 .withName("dog")
                 .build();
 
-        mysql.createKind(cat);
-        mysql.createKind(dog);
+        mysql.createKind(cat, ERole.ADMIN);
+        mysql.createKind(dog, ERole.ADMIN);
 
         BreedBuilder breedBuilder = new BreedBuilder();
 
@@ -137,25 +138,25 @@ public class Main {
                 .withName("abyssinian")
                 .build();
 
-        labrador.setBreedId(mysql.createBreed(labrador));
-        abyssinian.setBreedId(mysql.createBreed(abyssinian));
+        labrador.setBreedId(mysql.createBreed(labrador, ERole.ADMIN));
+        abyssinian.setBreedId(mysql.createBreed(abyssinian, ERole.ADMIN));
 
         CityBuilder cityBuilder = new CityBuilder();
 
         City kharkiv = cityBuilder.withName("Kharkiv").build();
 
-        kharkiv.setCityId(mysql.createCity(kharkiv));
+        kharkiv.setCityId(mysql.createCity(kharkiv, ERole.ADMIN));
 
         System.out.println("================ Get Breeds =================");
-        for (Breed dbBreed: mysql.getAllBreeds())
+        for (Breed dbBreed: mysql.getAllBreeds(ERole.ADMIN))
             System.out.println(dbBreed);
 
         System.out.println("================ Get Kinds =================");
-        for (Kind dbKind: mysql.getAllKinds())
+        for (Kind dbKind: mysql.getAllKinds(ERole.ADMIN))
             System.out.println(dbKind);
 
         System.out.println("================ Get Cities =================");
-        for (City dbCity: mysql.getAllCities())
+        for (City dbCity: mysql.getAllCities(ERole.ADMIN))
             System.out.println(dbCity);
 
         OwnerBuilder ownerBuilder = new OwnerBuilder();
@@ -168,10 +169,10 @@ public class Main {
                 .withFkCityId(kharkiv.getCityId())
                 .build();
 
-        owner.setOwnerId(mysql.createOwner(owner));
+        owner.setOwnerId(mysql.createOwner(owner, ERole.ADMIN));
 
         System.out.println("================ Get Owners =================");
-        for (Owner dbOwner: mysql.searchOwner(new OwnerSearchObject()))
+        for (Owner dbOwner: mysql.searchOwner(new OwnerSearchObject(), ERole.ADMIN))
             System.out.println(dbOwner);
 
         CatCreator catCreator = new CatCreator(mysql);
@@ -183,7 +184,7 @@ public class Main {
         catPet.setSex(true);
         catPet.setName("random cat");
 
-        mysql.createPet(catPet);
+        mysql.createPet(catPet, ERole.ADMIN);
 
         DogCreator dogCreator = new DogCreator(mysql);
         Pet dogPet = dogCreator.create();
@@ -192,11 +193,11 @@ public class Main {
         dogPet.setDateOfBirth(new Date());
         catPet.setName("random dog");
 
-        mysql.createPet(dogPet);
+        mysql.createPet(dogPet, ERole.ADMIN);
 
 
         System.out.println("============= Get Pets ===============");
-        for (Pet dbPet: mysql.getAllPets())
+        for (Pet dbPet: mysql.getAllPets(ERole.ADMIN))
             System.out.println(dbPet);
     }
 }

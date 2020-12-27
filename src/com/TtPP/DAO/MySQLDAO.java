@@ -67,7 +67,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public List<Pet> getAllPets () throws Exception {
+    public List<Pet> getAllPets (ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement("SELECT * FROM Pet;");
 
         ResultSet result = statement.executeQuery();
@@ -76,7 +76,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public List<City> getAllCities () throws Exception {
+    public List<City> getAllCities (ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement("SELECT * FROM City;");
 
         ResultSet result = statement.executeQuery();
@@ -94,7 +94,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public List<Breed> getAllBreeds () throws Exception {
+    public List<Breed> getAllBreeds (ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement("SELECT * FROM Breed;");
 
         ResultSet result = statement.executeQuery();
@@ -112,7 +112,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public List<Kind> getAllKinds () throws Exception {
+    public List<Kind> getAllKinds (ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement("SELECT * FROM Kind");
 
         ResultSet result = statement.executeQuery();
@@ -130,12 +130,12 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void dropOwners () throws Exception {
+    public void dropOwners (ERole userRole) throws Exception {
         connection.prepareStatement("DELETE FROM Owner").execute();
     }
 
     @Override
-    public int createCity (City city) throws Exception {
+    public int createCity (City city, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "INSERT City(name) VALUES(?)"
         );
@@ -150,7 +150,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void deleteCity (City city) throws Exception {
+    public void deleteCity (City city, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "DELETE FROM City WHERE cityId = ?"
         );
@@ -167,7 +167,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void updateCity (City city) throws Exception {
+    public void updateCity (City city, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "UPDATE City SET name = ? WHERE cityId = ?"
         );
@@ -181,7 +181,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public int createKind (Kind kind) throws Exception {
+    public int createKind (Kind kind, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "INSERT Kind(name) VALUES(?)"
         );
@@ -196,7 +196,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public int createBreed (Breed breed) throws Exception {
+    public int createBreed (Breed breed, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "INSERT Breed(name) VALUES(?)"
         );
@@ -211,7 +211,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public int createPet (Pet pet) throws Exception {
+    public int createPet (Pet pet, ERole userRole) throws Exception {
         events.notify(NEW_PET, this);
 
         PreparedStatement statement = connection.prepareStatement(
@@ -236,7 +236,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void deletePet (Pet pet) throws Exception {
+    public void deletePet (Pet pet, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "DELETE FROM Pet WHERE petId = ?"
         );
@@ -253,7 +253,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void updatePet (Pet pet) throws Exception {
+    public void updatePet (Pet pet, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "UPDATE Pet SET fkParentId = ?, fkOwnerId = ?, fkKindId = ?, fkBreedId = ?, name = ?, dateOfBirth = ?, sex = ? WHERE petId = ?"
         );
@@ -281,7 +281,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public int createOwner(Owner owner) throws Exception {
+    public int createOwner(Owner owner, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "INSERT Owner (firstName, lastName, phoneNumber, email, fkCityId)" +
                         "VALUES (?, ?, ?, ?, ?) "
@@ -301,7 +301,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void deleteOwner(int ownerId) throws Exception {
+    public void deleteOwner(int ownerId, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "DELETE FROM Owner WHERE ownerId = ?"
         );
@@ -314,7 +314,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public void updateOwner(Owner owner) throws Exception {
+    public void updateOwner(Owner owner, ERole userRole) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "UPDATE Owner SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, fkCityId = ? WHERE ownerId = ?"
         );
@@ -336,7 +336,51 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public List<Owner> searchOwner(OwnerSearchObject ownerSearchObject) throws Exception {
+    public User login(String login, String password) throws Exception {
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM User WHERE login = ? AND password = ?;");
+
+        statement.setString(1, login);
+        statement.setString(2, password);
+
+
+        ResultSet resultSet = statement.executeQuery();
+
+        if (resultSet.next()) {
+            User user = new User();
+            user.setUserId(resultSet.getInt("userId"));
+            user.setFkRoleId(resultSet.getInt("fkRoleId"));
+            user.setLogin(resultSet.getString("login"));
+            user.setPassword(resultSet.getString("password"));
+
+            return user;
+        }
+
+        throw new Exception("User not found!");
+    }
+
+    @Override
+    public User register(String login, String password, Role role) throws Exception {
+        PreparedStatement statement = connection.prepareStatement("INSERT INTO User (login, password, fkRoleId) VALUE(?, ?, ?);");
+
+        statement.setString(1, login);
+        statement.setString(2, password);
+        statement.setInt(3, role.getRoleId());
+
+        statement.execute();
+
+        int id = getLastInsertID();
+
+        User user = new User();
+        user.setUserId(id);
+        user.setLogin(login);
+        user.setPassword(password);
+        user.setFkRoleId(role.getRoleId());
+
+        return user;
+    }
+
+    @Override
+    public List<Owner> searchOwner(OwnerSearchObject ownerSearchObject, ERole userRole) throws Exception {
         String searchQuery = "SELECT * FROM Owner ";
         boolean isFirst = true;
         List<String> order = new ArrayList<>();
@@ -404,7 +448,7 @@ public class MySQLDAO implements IDAO {
     }
 
     @Override
-    public List<Pet> getOwnerPets (Owner owner) throws Exception {
+    public List<Pet> getOwnerPets (Owner owner, ERole userRole) throws Exception {
         CallableStatement statement = connection.prepareCall("{CALL get_pets(?)}");
 
         statement.setInt(1, owner.getOwnerId());
@@ -477,7 +521,7 @@ public class MySQLDAO implements IDAO {
         statement.execute("UNLOCK TABLES;");
     }
 
-    public int getKindIdByName (String name) throws SQLException {
+    public int getKindIdByName (String name, ERole userRole) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("SELECT kindId FROM Kind WHERE name = ?;");
         statement.setString(1, name);
 
